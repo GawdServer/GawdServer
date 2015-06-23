@@ -1,6 +1,6 @@
 /**
  * GawdServer - A new way to serve Minecraft
- * Copyright (C) 2015  CoolV1994 <http://coolv1994.tk>
+ * Copyright (C) 2015  GawdServer <http://gawdserver.github.io>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,13 +15,10 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package tk.coolv1994.gawdserver.launcher;
+package io.github.gawdserver.launcher;
 
 import java.util.List;
 
-/**
- * Created by Vinnie on 9/25/14.
- */
 public class ServerProcess {
     private final List<String> commands;
     private final Process process;
@@ -82,7 +79,7 @@ public class ServerProcess {
     }
 
     public String toString() {
-        return "ServerProcess[commands=" + commands + ", isRunning=" + isRunning() + "]";
+        return String.format("ServerProcess[isRunning=%b]", isRunning());
     }
 
     public void stop() {

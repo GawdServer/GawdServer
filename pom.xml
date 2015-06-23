@@ -2,9 +2,9 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>tk.coolv1994</groupId>
+    <groupId>io.github.gawdserver</groupId>
     <artifactId>gawdserver</artifactId>
-    <version>1.0.0</version>
+    <version>1.0.1-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <name>GawdServer</name>
@@ -36,7 +36,7 @@
                 <configuration>
                     <archive>
                         <manifest>
-                            <mainClass>tk.coolv1994.gawdserver.launcher.Launch</mainClass>
+                            <mainClass>io.github.gawdserver.launcher.Launch</mainClass>
                         </manifest>
                     </archive>
                 </configuration>
@@ -61,9 +61,9 @@
 
     <dependencies>
         <dependency>
-            <groupId>tk.coolv1994</groupId>
-            <artifactId>gawdapi</artifactId>
-            <version>1.0.0</version>
+            <groupId>io.github.gawdserver</groupId>
+            <artifactId>api</artifactId>
+            <version>1.0.2-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>junit</groupId>

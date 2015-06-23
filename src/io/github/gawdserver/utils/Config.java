@@ -1,6 +1,6 @@
 /**
  * GawdServer - A new way to serve Minecraft
- * Copyright (C) 2015  CoolV1994 <http://coolv1994.tk>
+ * Copyright (C) 2015  GawdServer <http://gawdserver.github.io>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,73 +15,56 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package tk.coolv1994.gawdserver.utils;
+package io.github.gawdserver.utils;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
 import java.io.*;
 
-/**
- * Created by Vinnie on 2/4/2015.
- */
 public class Config {
-    public static final File configFile = new File("./GawdServer.conf");
-    private final String javaPath;
-    private final String[] javaArgs;
-    private final String serverDir;
-    private final String[] classPath;
-    private final String mainClass;
-    private final String[] serverArgs;
+    private static final File configFile = new File("GawdServer.json");
+    private final File pluginDir;
+    private final String commandPrefix;
+    private final int commandPrefixLength;
+    private final int threads;
 
     public Config() {
-        this.javaPath = null;
-        this.javaArgs = new String[]{"-Xmx1024M", "-Xms1024M", "-Djline.terminal=jline.UnsupportedTerminal", "-XX:+UseConcMarkSweepGC", "-XX:+CMSClassUnloadingEnabled", "-XX:MaxPermSize=256M"};
-        this.serverDir = null;
-        this.classPath = new String[]{"minecraft_server.jar"};
-        this.mainClass = "net.minecraft.server.MinecraftServer";
-        this.serverArgs = new String[]{"nogui"};
+        pluginDir = new File("plugins");
+        commandPrefix = "!";
+        commandPrefixLength = commandPrefix.length();
+
+        threads = 2 * Runtime.getRuntime().availableProcessors();
     }
 
-    public Config(String javaPath, String[] javaArgs, String serverDir, String[] classPath, String mainClass, String[] serverArgs) {
-        this.javaPath = javaPath;
-        this.javaArgs = javaArgs;
-        this.serverDir = serverDir;
-        this.classPath = classPath;
-        this.mainClass = mainClass;
-        this.serverArgs = serverArgs;
+    public Config(File pluginDir, String commandPrefix, int threads) {
+        this.pluginDir = pluginDir;
+        this.commandPrefix = commandPrefix;
+        this.commandPrefixLength = this.commandPrefix.length();
+        this.threads = threads;
     }
 
-    public String getJavaPath() {
-        return javaPath;
+    public File getPluginDir() {
+        return pluginDir;
     }
 
-    public String[] getJavaArgs() {
-        return javaArgs;
+    public String getCommandPrefix() {
+        return commandPrefix;
     }
 
-    public File getServerDir() {
-        if (serverDir != null)
-            return new File(serverDir);
-        return null;
+    public int getCommandPrefixLegnth() {
+        return commandPrefixLength;
     }
 
-    public String[] getClassPath() {
-        return classPath;
-    }
-
-    public String getMainClass() {
-        return mainClass;
-    }
-
-    public String[] getServerArgs() {
-        return serverArgs;
+    public int getThreads() {
+        return threads;
     }
 
     public static Config loadConfig() {
         try {
             return new Gson().fromJson(new FileReader(configFile), Config.class);
         } catch (FileNotFoundException e) {
+            System.out.println("[GawdServer] Missing configuration. Using defaults.");
             Config defaults = new Config();
             defaults.saveConfig();
             return defaults;
@@ -102,7 +85,8 @@ public class Config {
             bw.write(gson.toJson(this));
             bw.close();
         } catch (IOException e) {
-            System.out.println("Error saving configuration.\n" + e.getMessage());
+            System.out.println("[GawdServer] Error saving configuration.");
+            System.out.println(e.getMessage());
         }
     }
 }

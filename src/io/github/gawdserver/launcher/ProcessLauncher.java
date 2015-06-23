@@ -1,6 +1,6 @@
 /**
  * GawdServer - A new way to serve Minecraft
- * Copyright (C) 2015  CoolV1994 <http://coolv1994.tk>
+ * Copyright (C) 2015  GawdServer <http://gawdserver.github.io>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package tk.coolv1994.gawdserver.launcher;
+package io.github.gawdserver.launcher;
 
 import java.io.File;
 import java.io.IOException;
@@ -23,9 +23,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-/**
- * Created by Vinnie on 9/25/14.
- */
 public final class ProcessLauncher {
     private final String jvmPath;
     private final List<String> commands;
@@ -72,7 +69,7 @@ public final class ProcessLauncher {
         return directory;
     }
 
-    protected String getJavaPath() {
+    public String getJavaPath() {
         return jvmPath;
     }
 
@@ -87,6 +84,6 @@ public final class ProcessLauncher {
     }
 
     public String toString() {
-        return "ProcessLauncher[commands=" + commands + ", java=" + jvmPath + "]";
+        return String.format("ProcessLauncher[java=%s, commands=%s, directory=%s]", jvmPath, commands, directory);
     }
 }
