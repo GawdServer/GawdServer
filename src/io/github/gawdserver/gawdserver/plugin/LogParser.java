@@ -15,18 +15,18 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package io.github.gawdserver.plugin;
+package io.github.gawdserver.gawdserver.plugin;
 
 import io.github.gawdserver.api.player.PlayerList;
 import io.github.gawdserver.api.utils.Chat;
+import io.github.gawdserver.gawdserver.Main;
 
 import java.util.Arrays;
-
-import static io.github.gawdserver.launcher.Launch.config;
 
 public class LogParser {
 	private static final int USERNAME = 3;
 	private static final int ACTION = 4;
+	private static final String commandPrefix = Main.config.getCommandPrefix();
 
 	public static void parse(String line) {
 		// Split for processing
@@ -40,7 +40,7 @@ public class LogParser {
 
 		// Check for UUIDs
 		if (segment.length == 10 && segment[1].equals("[User") && segment[2].equals("Authenticator")) {
-			System.out.printf("[UUID Mapping] Username: %s UUID: %s%n", segment[7], segment[9]);
+			//System.out.printf("[UUID Mapping] Username: %s UUID: %s%n", segment[7], segment[9]);
 			PlayerList.addPlayerID(segment[7], segment[9]);
 			return;
 		}
@@ -48,13 +48,13 @@ public class LogParser {
 		// Player Access Event
 		if (segment.length == 7 && segment[5].equals("the") && segment[6].equals("game")) {
 			if (segment[ACTION].equals("joined")) {
-				System.out.printf("[Login Event] Username: %s%n", segment[USERNAME]);
+				//System.out.printf("[Login Event] Username: %s%n", segment[USERNAME]);
 				PlayerList.playerLogin(segment[USERNAME]);
 				EventManager.playerConnect(segment[USERNAME]);
 				return;
 			}
 			if (segment[ACTION].equals("left")) {
-				System.out.printf("[Logout Event] Username: %s%n", segment[USERNAME]);
+				//System.out.printf("[Logout Event] Username: %s%n", segment[USERNAME]);
 				PlayerList.playerLogout(segment[USERNAME]);
 				EventManager.playerDisconnect(segment[USERNAME]);
 				return;
@@ -78,8 +78,8 @@ public class LogParser {
 		String username = segment[USERNAME].substring(1, segment[USERNAME].length() - 1);
 
 		// Command
-		if (segment[ACTION].startsWith(config.getCommandPrefix())) {
-			String command = segment[ACTION].substring(config.getCommandPrefixLegnth());
+		if (segment[ACTION].startsWith(commandPrefix)) {
+			String command = segment[ACTION].substring(commandPrefix.length());
 			if (EventManager.commands.containsKey(command)) {
 				String[] arguments = Arrays.copyOfRange(segment, 5, segment.length);
 				EventManager.playerCommand(username, command, arguments);

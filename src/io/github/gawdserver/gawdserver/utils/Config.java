@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package io.github.gawdserver.utils;
+package io.github.gawdserver.gawdserver.utils;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -26,22 +26,26 @@ public class Config {
     private static final File configFile = new File("GawdServer.json");
     private final File pluginDir;
     private final String commandPrefix;
-    private final int commandPrefixLength;
     private final int threads;
+    private final long pluginShutdownWait;
 
-    public Config() {
+    private Config() {
         pluginDir = new File("plugins");
         commandPrefix = "!";
-        commandPrefixLength = commandPrefix.length();
-
         threads = 2 * Runtime.getRuntime().availableProcessors();
+        pluginShutdownWait = 60;
     }
 
-    public Config(File pluginDir, String commandPrefix, int threads) {
+    private Config(
+            File pluginDir,
+            String commandPrefix,
+            int threads,
+            long pluginShutdownWait
+    ) {
         this.pluginDir = pluginDir;
         this.commandPrefix = commandPrefix;
-        this.commandPrefixLength = this.commandPrefix.length();
         this.threads = threads;
+        this.pluginShutdownWait = pluginShutdownWait;
     }
 
     public File getPluginDir() {
@@ -52,26 +56,26 @@ public class Config {
         return commandPrefix;
     }
 
-    public int getCommandPrefixLegnth() {
-        return commandPrefixLength;
-    }
-
     public int getThreads() {
         return threads;
     }
 
-    public static Config loadConfig() {
+    public long getPluginShutdownWait() {
+        return pluginShutdownWait;
+    }
+
+    public static Config load() {
         try {
             return new Gson().fromJson(new FileReader(configFile), Config.class);
         } catch (FileNotFoundException e) {
             System.out.println("[GawdServer] Missing configuration. Using defaults.");
             Config defaults = new Config();
-            defaults.saveConfig();
+            defaults.save();
             return defaults;
         }
     }
 
-    public void saveConfig() {
+    private void save() {
         GsonBuilder builder = new GsonBuilder();
         builder.setPrettyPrinting();
         builder.enableComplexMapKeySerialization();

@@ -15,15 +15,15 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package io.github.gawdserver.launcher;
+package io.github.gawdserver.gawdserver.launcher;
 
-import io.github.gawdserver.plugin.LogParser;
+import io.github.gawdserver.gawdserver.plugin.LogParser;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
-public class ProcessMonitorThread extends Thread {
+class ProcessMonitorThread extends Thread {
 
     private final ServerProcess process;
 
@@ -32,19 +32,22 @@ public class ProcessMonitorThread extends Thread {
     }
 
     public void run() {
-        try (BufferedReader buffer = new BufferedReader(new InputStreamReader(process.getRawProcess().getInputStream()))) {
+        try (BufferedReader buffer = new BufferedReader(new InputStreamReader(process.getProcess().getInputStream()))) {
             for (String line; (line = buffer.readLine()) != null; ) {
                 // Print Output
                 System.out.println(line);
                 // Look for Plugin Events
+                // Should there be an exception, we don't want to crash the server output
                 try {
                     LogParser.parse(line);
                 } catch (Exception ex) {
-                    System.out.printf("Error parsing log.%n%s%n", ex.getMessage());
+                    System.out.println("[GawdServer] Error parsing log.");
+                    System.out.println(ex.getMessage());
                 }
             }
         } catch (IOException ex) {
-            System.out.printf("Error reading from Minecraft Server process.%n%s%n", ex.getMessage());
+            System.out.println("[GawdServer] Error reading from Minecraft Server process.");
+            System.out.println(ex.getMessage());
         }
 
         ServerExit onExit = process.getExitRunnable();

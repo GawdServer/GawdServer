@@ -15,65 +15,51 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package io.github.gawdserver.launcher;
+package io.github.gawdserver.gawdserver.launcher;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 public final class ProcessLauncher {
-    private final String jvmPath;
     private final List<String> commands;
     private File directory;
 
-    public ProcessLauncher(String jvmPath, String... commands) {
+    public ProcessLauncher(String jvmPath) {
         if (jvmPath == null) {
             jvmPath = getJavaDir();
         }
-        this.jvmPath = jvmPath;
-        this.commands = new ArrayList<>(commands.length);
-        addCommands(commands);
+        this.commands = new ArrayList<>();
+        commands.add(jvmPath);
     }
 
-    public ServerProcess start()
-            throws IOException {
-        List<String> full = getFullCommands();
-        return new ServerProcess(full, new ProcessBuilder(full).directory(directory).redirectErrorStream(true).start());
+    public ServerProcess start() throws IOException {
+        return new ServerProcess(
+                new ProcessBuilder(commands)
+                        .directory(directory)
+                        .redirectErrorStream(true)
+                        .start()
+        );
     }
 
-    public List<String> getFullCommands() {
-        List<String> result = new ArrayList<>(commands);
-        result.add(0, getJavaPath());
-        return result;
+    public void addCommand(String command) {
+        this.commands.add(command);
     }
 
-    public List<String> getCommands() {
-        return commands;
+    public void addCommands(List<String> commands) {
+        this.commands.addAll(commands);
     }
 
-    public void addCommands(String... commands) {
-        this.commands.addAll(Arrays.asList(commands));
-    }
-
-    public void addSplitCommands(String commands) {
-        addCommands(commands.split(" "));
-    }
-
-    public void directory(File directory) {
+    public void setDirectory(File directory) {
         this.directory = directory;
     }
 
-    public File getDirectory() {
-        return directory;
+    public String toString() {
+        return String.format("ProcessLauncher[commands=%s, directory=%s]", commands, directory);
     }
 
-    public String getJavaPath() {
-        return jvmPath;
-    }
-
-    public String getJavaDir() {
+    public static String getJavaDir() {
         String separator = System.getProperty("file.separator");
         String path = System.getProperty("java.home") + separator + "bin" + separator;
         if ((System.getProperty("os.name").toLowerCase().startsWith("win"))
@@ -81,9 +67,5 @@ public final class ProcessLauncher {
             return path + "javaw.exe";
         }
         return path + "java";
-    }
-
-    public String toString() {
-        return String.format("ProcessLauncher[java=%s, commands=%s, directory=%s]", jvmPath, commands, directory);
     }
 }

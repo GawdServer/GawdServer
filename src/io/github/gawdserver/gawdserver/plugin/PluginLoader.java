@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package io.github.gawdserver.plugin;
+package io.github.gawdserver.gawdserver.plugin;
 
 import io.github.gawdserver.api.events.ChatEvent;
 import io.github.gawdserver.api.events.Command;

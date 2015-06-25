@@ -1,9 +1,10 @@
-package io.github.gawdserver.plugin;
+package io.github.gawdserver.gawdserver.plugin;
 
 import io.github.gawdserver.api.events.ChatEvent;
 import io.github.gawdserver.api.events.Command;
 import io.github.gawdserver.api.events.LogEvent;
 import io.github.gawdserver.api.events.PlayerAccessEvent;
+import io.github.gawdserver.api.player.Console;
 import io.github.gawdserver.api.plugin.Plugin;
 import io.github.gawdserver.api.plugin.PluginQueue;
 
@@ -12,25 +13,23 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class EventManager {
-	// Plugin Name - Main Class
+	// Plugin Name - Class
 	public static final Map<String, Plugin> plugins = new HashMap<>();
-	// Command Name - Command Class
 	public static final Map<String, Command> commands = new HashMap<>();
-	// Plugin Name - Event Class
 	public static final Map<String, PlayerAccessEvent> accessEvent = new HashMap<>();
 	public static final Map<String, ChatEvent> chatEvent = new HashMap<>();
 	public static final Map<String, LogEvent> logEvent = new HashMap<>();
 
 	public static void enablePlugins() {
 		for (final Map.Entry<String, Plugin> plugin : plugins.entrySet()) {
-			System.out.println("[GawdServer] Enabling " + plugin.getKey() + "...");
+			System.out.printf("[GawdServer] Enabling plugin %s...%n", plugin.getKey());
 			PluginQueue.submit(() -> plugin.getValue().startup());
 		}
 	}
 
 	public static void disablePlugins() {
 		for (final Map.Entry<String, Plugin> plugin : plugins.entrySet()) {
-			System.out.println("[GawdServer] Disabling " + plugin.getKey() + "...");
+			System.out.printf("[GawdServer] Disabling plugin %s...%n", plugin.getKey());
 			PluginQueue.submit(() -> plugin.getValue().shutdown());
 		}
 	}
@@ -44,7 +43,7 @@ public class EventManager {
 
 	public static void serverCommand(final String command, final String... arguments) {
 		PluginQueue.submit(() -> {
-			System.out.printf("[GawdServer] CONSOLE used command %s %s%n", command, Arrays.toString(arguments));
+			System.out.printf("[GawdServer] %s used command %s %s%n", Console.CONSOLE, command, Arrays.toString(arguments));
 			commands.get(command).serverCommand(arguments);
 		});
 	}

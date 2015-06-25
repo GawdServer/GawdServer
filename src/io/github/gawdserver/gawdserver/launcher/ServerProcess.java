@@ -15,36 +15,24 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package io.github.gawdserver.launcher;
-
-import java.util.List;
+package io.github.gawdserver.gawdserver.launcher;
 
 public class ServerProcess {
-    private final List<String> commands;
     private final Process process;
     private ServerExit onExit;
 
-    public ServerProcess(List<String> commands, Process process) {
-        this.commands = commands;
+    public ServerProcess(Process process) {
         this.process = process;
 
         ProcessMonitorThread monitor = new ProcessMonitorThread(this);
         monitor.start();
     }
 
-    public Process getRawProcess() {
+    public Process getProcess() {
         return process;
     }
 
-    public List<String> getStartupCommands() {
-        return commands;
-    }
-
-    public String getStartupCommand() {
-        return process.toString();
-    }
-
-    public boolean isRunning() {
+    private boolean isRunning() {
         try {
             process.exitValue();
         } catch (IllegalThreadStateException ex) {
@@ -53,8 +41,8 @@ public class ServerProcess {
         return false;
     }
 
-    public void setExitRunnable(ServerExit runnable) {
-        onExit = runnable;
+    private void setExitRunnable(ServerExit onExit) {
+        this.onExit = onExit;
     }
 
     public void safeSetExitRunnable(ServerExit runnable) {

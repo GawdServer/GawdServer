@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package io.github.gawdserver.launcher;
+package io.github.gawdserver.gawdserver.launcher;
 
 public interface ServerExit {
 

@@ -15,32 +15,50 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package io.github.gawdserver.utils;
+package io.github.gawdserver.gawdserver.utils;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import io.github.gawdserver.gawdserver.launcher.ProcessLauncher;
 
 import java.io.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class LauncherConfig {
     private static final File configFile = new File("Launcher.json");
     private final String javaPath;
-    private final String[] javaArgs;
-    private final String serverDir;
-    private final String[] classPath;
+    private final List<String> javaArgs;
+    private final File serverDir;
+    private final List<String> classPath;
     private final String mainClass;
-    private final String[] serverArgs;
+    private final List<String> serverArgs;
 
-    public LauncherConfig() {
-        this.javaPath = null;
-        this.javaArgs = new String[]{"-Xmx1024M", "-Xms1024M", "-Djline.terminal=jline.UnsupportedTerminal", "-XX:+UseConcMarkSweepGC", "-XX:+CMSClassUnloadingEnabled", "-XX:MaxPermSize=256M"};
-        this.serverDir = null;
-        this.classPath = new String[]{"minecraft_server.jar"};
-        this.mainClass = "net.minecraft.server.MinecraftServer";
-        this.serverArgs = new String[]{"nogui"};
+    private LauncherConfig() {
+        javaPath = ProcessLauncher.getJavaDir();
+        javaArgs = new ArrayList<>();
+        javaArgs.add("-Xmx1024M");
+        javaArgs.add("-Xms1024M");
+        javaArgs.add("-Djline.terminal=jline.UnsupportedTerminal");
+        javaArgs.add("-XX:+UseConcMarkSweepGC");
+        javaArgs.add("-XX:+CMSClassUnloadingEnabled");
+        javaArgs.add("-XX:MaxPermSize=128M");
+        serverDir = null;
+        classPath = new ArrayList<>();
+        classPath.add("minecraft_server.jar");
+        mainClass = "net.minecraft.server.MinecraftServer";
+        serverArgs = new ArrayList<>();
+        serverArgs.add("nogui");
     }
 
-    public LauncherConfig(String javaPath, String[] javaArgs, String serverDir, String[] classPath, String mainClass, String[] serverArgs) {
+    private LauncherConfig(
+            String javaPath,
+            List<String> javaArgs,
+            File serverDir,
+            List<String> classPath,
+            String mainClass,
+            List<String> serverArgs
+    ) {
         this.javaPath = javaPath;
         this.javaArgs = javaArgs;
         this.serverDir = serverDir;
@@ -53,17 +71,15 @@ public class LauncherConfig {
         return javaPath;
     }
 
-    public String[] getJavaArgs() {
+    public List<String> getJavaArgs() {
         return javaArgs;
     }
 
     public File getServerDir() {
-        if (serverDir != null)
-            return new File(serverDir);
-        return null;
+        return serverDir;
     }
 
-    public String[] getClassPath() {
+    public List<String> getClassPath() {
         return classPath;
     }
 
@@ -71,22 +87,22 @@ public class LauncherConfig {
         return mainClass;
     }
 
-    public String[] getServerArgs() {
+    public List<String> getServerArgs() {
         return serverArgs;
     }
 
-    public static LauncherConfig loadConfig() {
+    public static LauncherConfig load() {
         try {
             return new Gson().fromJson(new FileReader(configFile), LauncherConfig.class);
         } catch (FileNotFoundException e) {
             System.out.println("[GawdServer] Missing launcher configuration. Using defaults.");
             LauncherConfig defaults = new LauncherConfig();
-            defaults.saveConfig();
+            defaults.save();
             return defaults;
         }
     }
 
-    public void saveConfig() {
+    private void save() {
         GsonBuilder builder = new GsonBuilder();
         builder.setPrettyPrinting();
         builder.enableComplexMapKeySerialization();
