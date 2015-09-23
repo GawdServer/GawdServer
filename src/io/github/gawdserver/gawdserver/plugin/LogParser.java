@@ -18,6 +18,7 @@
 package io.github.gawdserver.gawdserver.plugin;
 
 import io.github.gawdserver.api.player.PlayerList;
+import io.github.gawdserver.api.player.Sender;
 import io.github.gawdserver.api.utils.Chat;
 import io.github.gawdserver.gawdserver.Main;
 
@@ -27,6 +28,42 @@ public class LogParser {
 	private static final int USERNAME = 3;
 	private static final int ACTION = 4;
 	private static final String commandPrefix = Main.config.getCommandPrefix();
+
+	private static void playerCommandOrChat(String username, String[] segment) {
+		// Command
+		if (segment[ACTION].startsWith(commandPrefix)) {
+			String command = segment[ACTION].substring(commandPrefix.length());
+			if (EventManager.commands.containsKey(command)) {
+				String[] arguments = Arrays.copyOfRange(segment, 5, segment.length);
+				EventManager.playerCommand(username, command, arguments);
+				return;
+			}
+		}
+
+		// Chat
+		String[] text = Arrays.copyOfRange(segment, ACTION, segment.length);
+		EventManager.playerChat(username, Chat.toString(text));
+	}
+
+	private static void serverCommandOrChat(Sender sender, String[] segment) {
+		int offset = 0;
+		if (Sender.RCON.equals(sender)) {
+			offset = 1;
+		}
+		// Command
+		if (segment[ACTION+offset].startsWith(commandPrefix)) {
+			String command = segment[ACTION+offset].substring(commandPrefix.length());
+			if (EventManager.commands.containsKey(command)) {
+				String[] arguments = Arrays.copyOfRange(segment, 5+offset, segment.length);
+				EventManager.serverCommand(sender, command, arguments);
+				return;
+			}
+		}
+
+		// Chat
+		String[] text = Arrays.copyOfRange(segment, ACTION, segment.length);
+		EventManager.serverChat(Chat.toString(text));
+	}
 
 	public static void parse(String line) {
 		// Split for processing
@@ -39,21 +76,21 @@ public class LogParser {
 		}
 
 		// Check for UUIDs
-		if (segment.length == 10 && segment[1].equals("[User") && segment[2].equals("Authenticator")) {
+		if (10 == segment.length && "[User".equals(segment[1]) && "Authenticator".equals(segment[2])) {
 			//System.out.printf("[UUID Mapping] Username: %s UUID: %s%n", segment[7], segment[9]);
 			PlayerList.addPlayerID(segment[7], segment[9]);
 			return;
 		}
 
 		// Player Access Event
-		if (segment.length == 7 && segment[5].equals("the") && segment[6].equals("game")) {
-			if (segment[ACTION].equals("joined")) {
+		if (7 == segment.length && "the".equals(segment[5]) && "game".equals(segment[6])) {
+			if ("joined".equals(segment[ACTION])) {
 				//System.out.printf("[Login Event] Username: %s%n", segment[USERNAME]);
 				PlayerList.playerLogin(segment[USERNAME]);
 				EventManager.playerConnect(segment[USERNAME]);
 				return;
 			}
-			if (segment[ACTION].equals("left")) {
+			if ("left".equals(segment[ACTION])) {
 				//System.out.printf("[Logout Event] Username: %s%n", segment[USERNAME]);
 				PlayerList.playerLogout(segment[USERNAME]);
 				EventManager.playerDisconnect(segment[USERNAME]);
@@ -62,14 +99,32 @@ public class LogParser {
 		}
 
 		// Server Chat
-		if (segment[USERNAME].equals("[Server]")) {
-			String[] text = Arrays.copyOfRange(segment, ACTION, segment.length);
-			EventManager.serverChat(Chat.toString(text));
+		if (segment.length > 5 && "[Rcon]".equals(segment[ACTION])) {
+			serverCommandOrChat(Sender.RCON, segment);
+			return;
+		}
+
+		// Server Chat
+		if ("[@]".equals(segment[USERNAME])) {
+			serverCommandOrChat(Sender.COMMANDBLOCK, segment);
+			return;
+		}
+
+		// Server Chat
+		if ("[Server]".equals(segment[USERNAME])) {
+			serverCommandOrChat(Sender.SERVER, segment);
 			return;
 		}
 
 		// Does not contain username, Server Log
-		if (!(segment[USERNAME].startsWith("<") && segment[USERNAME].endsWith(">"))) {
+		if (
+				!(
+					(segment[USERNAME].startsWith("<") && segment[USERNAME].endsWith(">"))
+				||
+					(segment[USERNAME].startsWith("[") && segment[USERNAME].endsWith("]"))
+				)
+		)
+		{
 			EventManager.serverLog(line);
 			return;
 		}
@@ -77,18 +132,7 @@ public class LogParser {
 		// Strip prefix/suffix from username
 		String username = segment[USERNAME].substring(1, segment[USERNAME].length() - 1);
 
-		// Command
-		if (segment[ACTION].startsWith(commandPrefix)) {
-			String command = segment[ACTION].substring(commandPrefix.length());
-			if (EventManager.commands.containsKey(command)) {
-				String[] arguments = Arrays.copyOfRange(segment, 5, segment.length);
-				EventManager.playerCommand(username, command, arguments);
-				return;
-			}
-		}
-
 		// Player Chat
-		String[] text = Arrays.copyOfRange(segment, ACTION, segment.length);
-		EventManager.playerChat(username, Chat.toString(text));
+		playerCommandOrChat(username, segment);
 	}
 }

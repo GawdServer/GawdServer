@@ -4,7 +4,7 @@ import io.github.gawdserver.api.events.ChatEvent;
 import io.github.gawdserver.api.events.Command;
 import io.github.gawdserver.api.events.LogEvent;
 import io.github.gawdserver.api.events.PlayerAccessEvent;
-import io.github.gawdserver.api.player.Console;
+import io.github.gawdserver.api.player.Sender;
 import io.github.gawdserver.api.plugin.Plugin;
 import io.github.gawdserver.api.plugin.PluginQueue;
 
@@ -36,15 +36,15 @@ public class EventManager {
 
 	public static void playerCommand(final String username, final String command, final String... arguments) {
 		PluginQueue.submit(() -> {
-			System.out.printf("[GawdServer] %s used command %s %s%n", username, command, Arrays.toString(arguments));
+			System.out.printf("[GawdServer] %s used command: %s %s%n", username, command, Arrays.toString(arguments));
 			commands.get(command).playerCommand(username, arguments);
 		});
 	}
 
-	public static void serverCommand(final String command, final String... arguments) {
+	public static void serverCommand(final Sender sender, final String command, final String... arguments) {
 		PluginQueue.submit(() -> {
-			System.out.printf("[GawdServer] %s used command %s %s%n", Console.CONSOLE, command, Arrays.toString(arguments));
-			commands.get(command).serverCommand(arguments);
+			System.out.printf("[GawdServer] %s used command: %s %s%n", sender, command, Arrays.toString(arguments));
+			commands.get(command).serverCommand(sender, arguments);
 		});
 	}
 

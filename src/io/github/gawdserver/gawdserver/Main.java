@@ -18,6 +18,7 @@
 package io.github.gawdserver.gawdserver;
 
 import io.github.gawdserver.api.Server;
+import io.github.gawdserver.api.player.Sender;
 import io.github.gawdserver.api.plugin.PluginDir;
 import io.github.gawdserver.api.plugin.PluginQueue;
 import io.github.gawdserver.gawdserver.launcher.Launch;
@@ -70,7 +71,7 @@ public class Main {
 					String[] command = input.split(" ");
 					if (EventManager.commands.containsKey(command[0])) {
 						String[] arguments = Arrays.copyOfRange(command, 1, command.length);
-						EventManager.serverCommand(command[0], arguments);
+						EventManager.serverCommand(Sender.CONSOLE, command[0], arguments);
 					}
 					continue;
 				}
