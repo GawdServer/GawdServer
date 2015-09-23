@@ -4,7 +4,7 @@
 
     <groupId>io.github.gawdserver</groupId>
     <artifactId>gawdserver</artifactId>
-    <version>1.0.2-SNAPSHOT</version>
+    <version>1.0.2</version>
     <packaging>jar</packaging>
 
     <name>GawdServer</name>
