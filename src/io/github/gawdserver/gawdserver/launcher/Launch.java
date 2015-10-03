@@ -27,6 +27,7 @@ import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
 
 public class Launch implements Launcher, ServerExit {
     private BufferedWriter mcInput;
@@ -35,14 +36,13 @@ public class Launch implements Launcher, ServerExit {
         try {
             mcInput.write(command + "\n");
             mcInput.flush();
-        } catch (IOException e) {
-            System.out.println("[Launcher] Error sending command to server.");
-            System.out.println(e.getMessage());
+        } catch (IOException ex) {
+            Main.logger.log(Level.SEVERE, "Error sending command to server.", ex);
         }
     }
 
     public void launchServer() {
-        System.out.println("[Launcher] Starting Minecraft Server...");
+        Main.logger.info("Starting Minecraft Server...");
         // Load Launcher Config
         LauncherConfig launchConfig = LauncherConfig.load();
         // Java Executable
@@ -59,28 +59,33 @@ public class Launch implements Launcher, ServerExit {
         // Server Args
         processLauncher.addCommands(launchConfig.getServerArgs());
 
-        System.out.println(processLauncher.toString());
+        Main.logger.info(processLauncher.toString());
 
         try {
             ServerProcess process = processLauncher.start();
-            System.out.println(process.toString());
+            Main.logger.info(process.toString());
             process.safeSetExitRunnable(this);
 
             // Prepare the command sender
             mcInput = new BufferedWriter(new OutputStreamWriter(process.getProcess().getOutputStream()));
         } catch (IOException ex) {
-            System.out.println("[Launcher] Error starting Minecraft server!");
-            System.out.println(ex.getMessage());
+            Main.logger.log(Level.SEVERE, "Error starting Minecraft server!", ex);
         }
     }
 
     @Override
     public void onServerExit(ServerProcess process) {
-        int exitCode = process.getExitCode();
-        if (exitCode == 0) {
-            System.out.printf("[Launcher] Server ended with no troubles detected (exit code %d)%n", exitCode);
-        } else {
-            System.out.printf("[Launcher] Server ended with bad state (exit code %d)%n", exitCode);
+        int exitCode;
+        try {
+            exitCode = process.getExitCode();
+            if (exitCode == 0) {
+                Main.logger.info("Server ended with no troubles detected (exit code 0)");
+            } else {
+                Main.logger.log(Level.WARNING, "Server ended with bad state (exit code {0})", exitCode);
+            }
+        } catch (IllegalThreadStateException ex) {
+            exitCode = -1;
+            Main.logger.warning("Server process hasn't exited");
         }
         process.stop();
 
@@ -93,8 +98,7 @@ public class Launch implements Launcher, ServerExit {
             // Wait up to 1 minute for plugins to shutdown.
             PluginQueue.awaitTermination(Main.config.getPluginShutdownWait(), TimeUnit.SECONDS);
         } catch (InterruptedException ex) {
-            System.out.println("[GawdServer] Error waiting for plugins to shutdown.");
-            ex.printStackTrace();
+            Main.logger.log(Level.SEVERE, "Error waiting for plugins to shutdown.", ex);
         }
         System.exit(exitCode);
     }

@@ -19,8 +19,10 @@ package io.github.gawdserver.gawdserver.utils;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import io.github.gawdserver.gawdserver.Main;
 
 import java.io.*;
+import java.util.logging.Level;
 
 public class Config {
     private static final File configFile = new File("GawdServer.json");
@@ -68,7 +70,7 @@ public class Config {
         try {
             return new Gson().fromJson(new FileReader(configFile), Config.class);
         } catch (FileNotFoundException e) {
-            System.out.println("[GawdServer] Missing configuration. Using defaults.");
+            Main.logger.warning("Missing configuration. Using defaults.");
             Config defaults = new Config();
             defaults.save();
             return defaults;
@@ -88,9 +90,8 @@ public class Config {
             BufferedWriter bw = new BufferedWriter(fw);
             bw.write(gson.toJson(this));
             bw.close();
-        } catch (IOException e) {
-            System.out.println("[GawdServer] Error saving configuration.");
-            System.out.println(e.getMessage());
+        } catch (IOException ex) {
+            Main.logger.log(Level.SEVERE, "[GawdServer] Error saving configuration.", ex);
         }
     }
 }

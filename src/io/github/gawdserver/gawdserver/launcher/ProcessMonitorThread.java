@@ -17,11 +17,13 @@
  */
 package io.github.gawdserver.gawdserver.launcher;
 
+import io.github.gawdserver.gawdserver.Main;
 import io.github.gawdserver.gawdserver.plugin.LogParser;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.logging.Level;
 
 class ProcessMonitorThread extends Thread {
 
@@ -41,13 +43,11 @@ class ProcessMonitorThread extends Thread {
                 try {
                     LogParser.parse(line);
                 } catch (Exception ex) {
-                    System.out.println("[GawdServer] Error parsing log.");
-                    System.out.println(ex.getMessage());
+                    Main.logger.log(Level.SEVERE, "Error parsing log.", ex);
                 }
             }
         } catch (IOException ex) {
-            System.out.println("[GawdServer] Error reading from Minecraft Server process.");
-            System.out.println(ex.getMessage());
+            Main.logger.log(Level.SEVERE, "Error reading from Minecraft Server process.", ex);
         }
 
         ServerExit onExit = process.getExitRunnable();

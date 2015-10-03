@@ -37,8 +37,12 @@ import java.io.InputStreamReader;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class PluginLoader {
+
+    private static final Logger logger = Logger.getLogger("PluginLoader");
 
     private static boolean loadCommands(URLClassLoader loader, PluginInfo plugin) {
         for (Map.Entry<String, String> command : plugin.getCommands().entrySet()) {
@@ -46,10 +50,10 @@ public class PluginLoader {
                 Command onCommand = (Command) loader.loadClass(command.getValue()).newInstance();
                 EventManager.commands.put(command.getKey(), onCommand);
             } catch (ClassNotFoundException e) {
-                System.out.printf("[PluginLoader] No command class for plugin %s command %s%n", plugin.getName(), command.getKey());
+                logger.log(Level.SEVERE, "No command class for plugin {0} command {1}", new Object[]{plugin.getName(), command.getKey()});
                 return false;
             } catch (InstantiationException | IllegalAccessException e) {
-                System.out.printf("[PluginLoader] Error in command class for plugin %s command %s%n", plugin.getName(), command.getKey());
+                logger.log(Level.SEVERE, "Error in command class for plugin {0} command {1}", new Object[]{plugin.getName(), command.getKey()});
                 return false;
             }
         }
@@ -75,10 +79,10 @@ public class PluginLoader {
                         break;
                 }
             } catch (ClassNotFoundException e) {
-                System.out.printf("[PluginLoader] No event class for plugin %s event %s%n", plugin.getName(), event.getKey());
+                logger.log(Level.SEVERE, "No event class for plugin {0} event {1}", new Object[]{plugin.getName(), event.getKey()});
                 return false;
             } catch (InstantiationException | IllegalAccessException e) {
-                System.out.printf("[PluginLoader] Error in event class for plugin %s event %s%n", plugin.getName(), event.getKey());
+                logger.log(Level.SEVERE, "Error in event class for plugin {0} event {1}", new Object[]{plugin.getName(), event.getKey()});
                 return false;
             }
         }
@@ -94,11 +98,11 @@ public class PluginLoader {
             PluginInfo pluginInfo = new Gson().fromJson(reader, PluginInfo.class);
 
             if (pluginInfo.getName() == null || pluginInfo.getVersion() == null || pluginInfo.getMainClass() == null) {
-                System.out.printf("[PluginLoader] Invalid plugin.json for plugin %s%n", pluginJar.getName());
+                logger.log(Level.SEVERE, "Invalid plugin.json for plugin {0}", pluginJar.getName());
                 return;
             }
 
-            System.out.printf("[PluginLoader] Loading %s%n", pluginInfo.toString());
+            logger.log(Level.INFO, "Loading {0}", pluginInfo.toString());
 
             Class mainClass = classLoader.loadClass(pluginInfo.getMainClass());
             EventManager.plugins.put(pluginInfo.getName(), (Plugin) mainClass.newInstance());
@@ -117,22 +121,21 @@ public class PluginLoader {
 
             PluginList.addPlugin(pluginInfo.getName(), pluginInfo.getVersion());
 
-        } catch (NullPointerException e) {
-            System.out.printf("[PluginLoader] No plugin.json for plugin %s%n", pluginJar.getName());
-        } catch (JsonSyntaxException e) {
-            System.out.printf("[PluginLoader] Error parsing plugin.json for plugin %s%n", pluginJar.getName());
-        } catch (ClassNotFoundException e) {
-            System.out.printf("[PluginLoader] No main class for plugin %s%n", pluginJar.getName());
-        } catch (InstantiationException | IllegalAccessException e) {
-            System.out.printf("[PluginLoader] Error in main class for plugin %s%n", pluginJar.getName());
-        } catch (Exception e) {
-            System.out.printf("[PluginLoader] Error loading plugin %s%n", pluginJar.getName());
-            e.printStackTrace();
+        } catch (NullPointerException ex) {
+            logger.log(Level.SEVERE, "No plugin.json for plugin {0}", pluginJar.getName());
+        } catch (JsonSyntaxException ex) {
+            logger.log(Level.SEVERE, "Error parsing plugin.json for plugin {0}", pluginJar.getName());
+        } catch (ClassNotFoundException ex) {
+            logger.log(Level.SEVERE, "No main class for plugin {0}", pluginJar.getName());
+        } catch (InstantiationException | IllegalAccessException ex) {
+            logger.log(Level.SEVERE, "Error in main class for plugin {0}", pluginJar.getName());
+        } catch (Exception ex) {
+            logger.log(Level.SEVERE, "Error loading plugin " + pluginJar.getName(), ex);
         }
     }
 
     public static void loadPlugins() {
-        System.out.println("[PluginLoader] Loading plugins...");
+        logger.info("Loading plugins...");
         // No plugin dir set
         if (PluginDir.getPluginDir() == null) {
             return;

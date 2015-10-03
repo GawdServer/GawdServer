@@ -19,11 +19,13 @@ package io.github.gawdserver.gawdserver.utils;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import io.github.gawdserver.gawdserver.Main;
 import io.github.gawdserver.gawdserver.launcher.ProcessLauncher;
 
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
 
 public class LauncherConfig {
     private static final File configFile = new File("Launcher.json");
@@ -95,7 +97,7 @@ public class LauncherConfig {
         try {
             return new Gson().fromJson(new FileReader(configFile), LauncherConfig.class);
         } catch (FileNotFoundException e) {
-            System.out.println("[GawdServer] Missing launcher configuration. Using defaults.");
+            Main.logger.warning("Missing launcher configuration. Using defaults.");
             LauncherConfig defaults = new LauncherConfig();
             defaults.save();
             return defaults;
@@ -115,9 +117,8 @@ public class LauncherConfig {
             BufferedWriter bw = new BufferedWriter(fw);
             bw.write(gson.toJson(this));
             bw.close();
-        } catch (IOException e) {
-            System.out.println("[GawdServer] Error saving launcher configuration.");
-            System.out.println(e.getMessage());
+        } catch (IOException ex) {
+            Main.logger.log(Level.SEVERE, "Error saving launcher configuration.", ex);
         }
     }
 }

@@ -25,16 +25,44 @@ import io.github.gawdserver.gawdserver.launcher.Launch;
 import io.github.gawdserver.gawdserver.plugin.EventManager;
 import io.github.gawdserver.gawdserver.plugin.PluginLoader;
 import io.github.gawdserver.gawdserver.utils.Config;
+import io.github.gawdserver.gawdserver.utils.LogFormatter;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.Arrays;
 import java.util.concurrent.Executors;
+import java.util.logging.*;
 
 public class Main {
+	public static final String VERSION = "1.0.3";
+	public static final Logger logger = Logger.getLogger("Launcher");
 	public static Config config;
 
+	private static void initLogger() {
+		Logger global = logger.getParent();
+		for (Handler h : global.getHandlers()) {
+			global.removeHandler(h);
+		}
+		Formatter lf = new LogFormatter();
+		ConsoleHandler ch = new ConsoleHandler();
+		ch.setFormatter(lf);
+		global.addHandler(ch);
+		try {
+			FileHandler fh = new FileHandler("GawdServer.log");
+			fh.setFormatter(lf);
+			global.addHandler(fh);
+		} catch (IOException ex) {
+			logger.log(Level.SEVERE, "Error initializing the file logger.", ex);
+		}
+	}
+
 	public static void main(String[] args) {
+		// Initialize the logger
+		initLogger();
+
+		logger.log(Level.INFO, "Starting GawdServer version {0}", VERSION);
+
 		// Initialize this instance
 		Launch launcher = new Launch();
 
@@ -78,8 +106,7 @@ public class Main {
 				Server.sendCommand(input);
 			}
 		} catch (Exception ex) {
-			System.out.println("[GawdServer] IO error trying to read command input!");
-			System.out.println(ex.getMessage());
+			logger.log(Level.SEVERE, "IO error trying to read command input!", ex);
 		}
 	}
 }
