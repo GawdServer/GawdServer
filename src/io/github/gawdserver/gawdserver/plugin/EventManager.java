@@ -7,7 +7,6 @@ import io.github.gawdserver.api.events.PlayerAccessEvent;
 import io.github.gawdserver.api.player.Sender;
 import io.github.gawdserver.api.plugin.Plugin;
 import io.github.gawdserver.api.plugin.PluginQueue;
-import io.github.gawdserver.gawdserver.Main;
 
 import java.util.Arrays;
 import java.util.HashMap;
